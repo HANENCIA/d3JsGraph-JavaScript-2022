@@ -1,0 +1,13 @@
+.grid line {
+    stroke: lightgrey;
+    stroke-opacity: 0.7;
+    shape-rendering: crispEdges;
+}
+
+.grf_title {
+    font-size: 20px;
+}
+
+.tick {
+    font-size: 10px;
+}
