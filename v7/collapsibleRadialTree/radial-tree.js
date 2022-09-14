@@ -1,4 +1,7 @@
 // Get JSON data
+document.documentElement.setAttribute('color-theme', 'dark');
+var isDark = true;
+
 d3.csv("./flare.csv").then(treeData => {
 
     var DURATION = 700; // d3 animation duration
@@ -58,6 +61,7 @@ d3.csv("./flare.csv").then(treeData => {
 
     // define the svgBase, attaching a class for styling and the zoomListener
     var svgBase = d3.select('#tree-container').append('svg')
+        .attr('class', 'svgBase')
         .attr('width', width)
         .attr('height', height)
         .on('mousedown', mousedown);
@@ -75,7 +79,6 @@ d3.csv("./flare.csv").then(treeData => {
         .on('mousedown', tooldown)
         .on('mouseup', toolup);
     d3.select('#selection').on('mousedown', switchroot);
-    d3.select("#codeTitle").on('mousedown', showInfo);
     d3.select('#contextmenu').on('mouseup', menuSelection);
 
     // Define the data root
@@ -157,7 +160,7 @@ d3.csv("./flare.csv").then(treeData => {
             .attr('text-anchor', d => (d.x + curR) % 360 <= 180 ? 'start' : 'end')
             .attr('transform', d => ((d.x + curR) % 360 <= 180 ?
                 'translate(8)scale(' : 'rotate(180)translate(-8)scale(') + reduceZ() + ')')
-            .attr('fill', d => d.selected ? SELECTED_COLOR : 'black')
+            .attr('fill', d => d.selected ? SELECTED_COLOR : (isDark? 'white' : 'black'))
             .attr('dy', '.35em');
 
         // var nodeUpdate = node.transition().duration(duration)
@@ -191,7 +194,7 @@ d3.csv("./flare.csv").then(treeData => {
         var linkEnter = link.enter().insert('path', 'g')
             .attr('class', 'link')
             .attr("d", d => {
-                const o = {x: source.x0, y:source.y0};
+                const o = {x: source.x0, y: source.y0};
                 return diagonal({source: o, target: o});
             });
 
@@ -203,7 +206,7 @@ d3.csv("./flare.csv").then(treeData => {
         // Transition exiting nodes to the parent's new position
         link.exit().transition().duration(duration).remove()
             .attr("d", d => {
-                const o = {x: source.x0, y:source.y0};
+                const o = {x: source.x0, y: source.y0};
                 return diagonal({source: o, target: o});
             });
 
@@ -303,7 +306,6 @@ d3.csv("./flare.csv").then(treeData => {
         curNode.selected = true;
         curPath = []; // filled in by fullpath
         d3.select('#selection').html(fullpath(node));
-        d3.select('#codeTitle').html(nodeval(node));
     }
 
     // for displaying full path of node in tree
@@ -315,12 +317,6 @@ d3.csv("./flare.csv").then(treeData => {
             root.id.substring(root.id.lastIndexOf("|") + 1) ? ' highlight' : '') +
             '" data-sel="' + idx + '" title="Set Root to ' + d.id.substring(d.id.lastIndexOf("|") + 1) + '">' +
             d.id.substring(d.id.lastIndexOf("|") + 1) + '</span>';
-    }
-
-    // Value 출력
-    function nodeval(d) {
-        // return (d.data.value ? '<span class="nodeVal">' + d.data.value + '</span>' : '<span class="nodeVal">NO DATA</span>');
-        return '<span class="nodeVal">' + d.id.substring(d.id.lastIndexOf("|") + 1) + '</span>';
     }
 
     // d3 event handlers
@@ -342,28 +338,6 @@ d3.csv("./flare.csv").then(treeData => {
             target.classList.add('highlight');
         }
         update(root, true);
-    }
-
-    function showInfo(event) {
-        event.preventDefault();
-        // var pathelms = document.querySelectorAll('#codeTitle .nodeVal');
-        var curId = curNode.id.substring(curNode.id.lastIndexOf("|") + 1);
-        // HS Code인 경우
-        if (curId.match(/[0-9]{10}/)) {
-            var param = new URLSearchParams();
-            param.append("id", curId);
-            var strWindowFeatures = "location=yes, height=1000, width=1000, scrollbars=yes, status=yes";
-            var urlParam = "./info_hs.html?" + param.toString();
-            window.open(urlParam, "_blank", strWindowFeatures);
-        }
-        else {
-            var param = new URLSearchParams();
-            param.append("id", curId);
-            var strWindowFeatures = "location=yes, height=1000, width=1000, scrollbars=yes, status=yes";
-            var urlParam = "./info_cas.html?" + param.toString();
-            window.open(urlParam, "_blank", strWindowFeatures);
-        }
-
     }
 
     function resize() { // window resize
@@ -431,7 +405,9 @@ d3.csv("./flare.csv").then(treeData => {
 
     function hideContextMenu(isShowContextMenu) {
         d3.select('#contextmenu').style('display', 'none');
-        if (isShowContextMenu) {d3.select(document).on('mouseup', null);}
+        if (isShowContextMenu) {
+            d3.select(document).on('mouseup', null);
+        }
     }
 
     function menuSelection(event) {

@@ -133,7 +133,7 @@
 .node text {
   font-size: 12px;
   font-family: Roboto, sans-serif;
-  text-shadow: 4px 4px 3px white, -4px -4px 3px white;
+  text-shadow: var(--node-text-text-shadow);
 }
 .node text:hover {
   font-size: 1.2em;
@@ -147,4 +147,18 @@
   fill: none;
   stroke: #ccc;
   stroke-width: 1.5px;
+}
+
+.svgBase {
+  background: var(--background);
+}
+
+:root[color-theme='light'] {
+  --background: #fff;
+  --node-text-text-shadow: 4px 4px 3px white, -4px -4px 3px white;
+}
+
+:root[color-theme='dark'] {
+  --background: #000;
+  --node-text-text-shadow: 4px 4px 3px black, -4px -4px 3px black;
 }
