@@ -1,49 +1,53 @@
 // Get JSON data
-document.documentElement.setAttribute('color-theme', 'dark');
-var isDark = true;
-
 d3.csv("./flare.csv").then(treeData => {
 
-    var DURATION = 700; // d3 animation duration
-    var STAGGERN = 4; // delay for each node
-    var STAGGERD = 200; // delay for each depth
-    var NODE_DIAMETER = 4; // diameter of circular nodes
-    var MIN_ZOOM = 0.5; // minimum zoom allowed
-    var MAX_ZOOM = 10;  // maximum zoom allowed
-    var HAS_CHILDREN_COLOR = 'lightsteelblue';
-    var SELECTED_COLOR = '#a00';  // color of selected node
-    var ZOOM_INC = 0.04;  // zoom factor per animation frame
-    var PAN_INC = 3;  //  pan per animation frame
-    var ROT_INC = 0.3;  // rotation per animation frame
+    let DURATION = 700; // d3 animation duration
+    let STAGGERN = 4; // delay for each node
+    let STAGGERD = 200; // delay for each depth
+    let NODE_DIAMETER = 4; // diameter of circular nodes
+    let MIN_ZOOM = 0.5; // minimum zoom allowed
+    let MAX_ZOOM = 10;  // maximum zoom allowed
+    let HAS_CHILDREN_COLOR = 'lightsteelblue';
+    let SELECTED_COLOR = '#a00';  // color of selected node
+    let SELECTED_COLOR_DARK = "lime";
+    let ZOOM_INC = 0.04;  // zoom factor per animation frame
+    let PAN_INC = 3;  //  pan per animation frame
+    let ROT_INC = 0.3;  // rotation per animation frame
 
-    var counter = 0;  // node ids
-    var curNode;  // currently selected node
-    var curPath;  // array of nodes in the path to the currently selected node
+    let counter = 0;  // node ids
+    let curNode;  // currently selected node
+    let curPath;  // array of nodes in the path to the currently selected node
 
     // size of the diagram
-    var width = window.innerWidth - 20;
-    var height = window.innerHeight - 20;
+    let width = window.innerWidth - 20;
+    let height = window.innerHeight - 20;
 
     // current pan, zoom, and rotation
-    var curX = width / 2;
-    var curY = height / 2;
-    var curZ = 1.0; // current zoom
-    var curR = 270; // current rotation
+    let curX = width / 2;
+    let curY = height / 2;
+    let curZ = 1.0; // current zoom
+    let curR = 270; // current rotation
 
     // keyboard key codes
-    var KEY_PLUS = 187;     // + (zoom in)
-    var KEY_MINUS = 189;    // - (zoom out)
-    var KEY_SLASH = 191;    // / (slash)
-    var KEY_PAGEUP = 33;    // (rotate CCW)
-    var KEY_PAGEDOWN = 34;  // (rotate CW)
-    var KEY_LEFT = 37;      // left arrow
-    var KEY_UP = 38;        // up arrow
-    var KEY_RIGHT = 39;     // right arrow
-    var KEY_DOWN = 40;      // down arrow
-    var KEY_SPACE = 32;     // (expand node)
-    var KEY_RETURN = 13;    // (expand tree)
-    var KEY_HOME = 36;      // (center root)
-    var KEY_END = 35;       // (center selection)
+    let KEY_LIGHT = 76;     // l (light mode)
+    let KEY_DARK = 68;     // d (dark mode)
+    let KEY_PLUS = 187;     // + (zoom in)
+    let KEY_MINUS = 189;    // - (zoom out)
+    let KEY_SLASH = 191;    // / (slash)
+    let KEY_PAGEUP = 33;    // (rotate CCW)
+    let KEY_PAGEDOWN = 34;  // (rotate CW)
+    let KEY_LEFT = 37;      // left arrow
+    let KEY_UP = 38;        // up arrow
+    let KEY_RIGHT = 39;     // right arrow
+    let KEY_DOWN = 40;      // down arrow
+    let KEY_SPACE = 32;     // (expand node)
+    let KEY_RETURN = 13;    // (expand tree)
+    let KEY_HOME = 36;      // (center root)
+    let KEY_END = 35;       // (center selection)
+
+    // set dark mode default
+    document.documentElement.setAttribute('color-theme', 'dark');
+    let isDark = true;
 
     var stratify = d3.stratify()
         .parentId(d => d.id.substring(0, d.id.lastIndexOf("|")));
@@ -153,14 +157,14 @@ d3.csv("./flare.csv").then(treeData => {
         node.merge(nodeEnter).select('circle')
             .attr('r', NODE_DIAMETER * reduceZ())
             .style('fill', d => d._children ? HAS_CHILDREN_COLOR : 'white')
-            .attr('stroke', d => d.selected ? SELECTED_COLOR : 'steelblue')
+            .attr('stroke', d => d.selected ? (isDark? SELECTED_COLOR_DARK: SELECTED_COLOR) : 'steelblue')
             .attr('stroke-width', d => d.selected ? 3 : 1.5);
 
         node.merge(nodeEnter).select('text')
             .attr('text-anchor', d => (d.x + curR) % 360 <= 180 ? 'start' : 'end')
             .attr('transform', d => ((d.x + curR) % 360 <= 180 ?
                 'translate(8)scale(' : 'rotate(180)translate(-8)scale(') + reduceZ() + ')')
-            .attr('fill', d => d.selected ? SELECTED_COLOR : (isDark? 'white' : 'black'))
+            .attr('fill', d => d.selected ? (isDark? SELECTED_COLOR_DARK: SELECTED_COLOR) : (isDark ? 'white' : 'black'))
             .attr('dy', '.35em');
 
         // var nodeUpdate = node.transition().duration(duration)
@@ -218,6 +222,16 @@ d3.csv("./flare.csv").then(treeData => {
     } // end update
 
     // Helper functions for collapsing and expanding nodes
+
+    function lightMode() {
+        document.documentElement.setAttribute('color-theme', 'light');
+        isDark = false;
+    }
+
+    function darkMode() {
+        document.documentElement.setAttribute('color-theme', 'dark');
+        isDark = true;
+    }
 
     // Toggle expand / collapse
     function toggle(d) {
@@ -481,6 +495,14 @@ d3.csv("./flare.csv").then(treeData => {
             return;
         } // defeat auto repeat
         switch (key) {
+            case KEY_LIGHT: // light mode
+                lightMode();
+                update(root, true);
+                break;
+            case KEY_DARK: // dark mode
+                darkMode();
+                update(root, true);
+                break;
             case KEY_PLUS: // zoom in
                 moveZ = ZOOM_INC * slow;
                 break;

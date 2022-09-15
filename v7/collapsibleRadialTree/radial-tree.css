@@ -9,7 +9,7 @@
   top: 10px;
   left: 10px;
   font-family: Roboto, Helvetica, sans-serif;
-  box-shadow: 1px 1px 3px;
+  box-shadow: var(--tool-box-box_shadow);
   background-color: #ECEFF1;
 }
 .tool {
@@ -155,10 +155,12 @@
 
 :root[color-theme='light'] {
   --background: #fff;
+  --tool-box-box_shadow : 1px 1px 3px;
   --node-text-text-shadow: 4px 4px 3px white, -4px -4px 3px white;
 }
 
 :root[color-theme='dark'] {
   --background: #000;
+  --tool-box-box_shadow : 1px 1px 3px white;
   --node-text-text-shadow: 4px 4px 3px black, -4px -4px 3px black;
 }
