@@ -154,15 +154,15 @@
 }
 
 :root[color-theme='light'] {
-  --background: #fff;
+  --background: #F8F9FA;
   --tool-box-box_shadow : 1px 1px 3px;
   --node-text-text-shadow: 4px 4px 3px white, -4px -4px 3px white;
   --link-stroke: #ccc;
 }
 
 :root[color-theme='dark'] {
-  --background: #000;
+  --background: #222529;
   --tool-box-box_shadow : 1px 1px 3px white;
-  --node-text-text-shadow: 4px 4px 3px black, -4px -4px 3px black;
+  --node-text-text-shadow: 4px 4px 3px #222529, -4px -4px 3px #222529;
   --link-stroke: #318ce7;
 }
