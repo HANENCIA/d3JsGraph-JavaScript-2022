@@ -1,18 +1,18 @@
 // Graph Height
-const grf_height = 600;
+const grfHeight = 600;
 
 function init() {
     var src_path = "./sampleData.csv"
-    draw_pie_chart(src_path);
+    drawPieChart(src_path);
 }
 
-function draw_pie_chart(src_path) {
+function drawPieChart(src_path) {
     d3.csv(src_path).then(data => {
         var DURATION = 700; // d3 animation duration
 
         // size of the diagram
         var windowWidth = window.innerWidth - 30;
-        var windowHeight = grf_height;
+        var windowHeight = grfHeight;
 
         // current pan, zoom, and rotation
         var curX = windowWidth / 2;
@@ -24,11 +24,11 @@ function draw_pie_chart(src_path) {
             .range(["#5E4FA2", "#3288BD", "#66C2A5", "#ABDDA4", "#E6F598",
                 "#FFFFBF", "#FEE08B", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142"]);
 
-        d3.selectAll(".pie").remove();
+        d3.selectAll(".pieChart").remove();
 
         // define the svgBase, attaching a class for styling
-        var svgBase = d3.select("#pieChart").append("svg")
-            .attr("class", "pie")
+        var svgBase = d3.select("#pieChartGrf").append("svg")
+            .attr("class", "pieChart")
             .attr("width", windowWidth)
             .attr("height", windowHeight)
 
@@ -44,7 +44,7 @@ function draw_pie_chart(src_path) {
             .attr("class", "lines");
 
         // set up document events
-        d3.select(window).on('resize.pie', resize);
+        d3.select(window).on('resize.pieChart', resize);
 
         // Define the data root
         var root = data;
@@ -217,7 +217,7 @@ function draw_pie_chart(src_path) {
 
         function resize() { // window resize
             windowWidth = window.innerWidth - 30;
-            windowHeight = grf_height;
+            windowHeight = grfHeight;
             curX = windowWidth / 2;
             curY = windowHeight / 2;
             svgBase.attr('width', windowWidth).attr('height', windowHeight);

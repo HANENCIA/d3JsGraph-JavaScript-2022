@@ -6,7 +6,14 @@
     <link rel="stylesheet" type="text/css" href="./barChart.css">
 </head>
 <body>
-<div id="barChart"></div>
+<div>
+    <select id="darkMode" class="form-select" style="width:auto" type="select"
+            onchange="changeColorMode(value);">
+        <option value="light" selected="selected">Light</option>
+        <option value="dark">Dark</option>
+    </select>
+</div>
+<div id="barChartGrf"></div>
 <script type="text/javascript" src="barChart.js"></script>
 </body>
 </html>

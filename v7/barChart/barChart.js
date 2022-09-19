@@ -1,12 +1,50 @@
 // Graph Height
-const grf_height = 600;
+const grfHeight = 600;
 
 function init() {
+    lightMode();
     var src_path = "./sampleData.csv"
-    draw_bar_chart(src_path);
+    drawBarChart(src_path);
 }
 
-function draw_bar_chart(src_path) {
+function lightMode() {
+    document.documentElement.setAttribute('color-theme', 'light');
+
+    document.getElementById("articleCntGrf").setAttribute('class', 'bg-light border');
+    document.getElementById("articleCntRegionGrf").setAttribute('class', 'bg-light border');
+    document.getElementById("typCntGrf").setAttribute('class', 'bg-light border');
+    document.getElementById("catCntGrf").setAttribute('class', 'bg-light border');
+
+    spin_opts = {
+        lines: 9, // The number of lines to draw
+        length: 9, // The length of each line
+        width: 5, // The line thickness
+        radius: 14, // The radius of the inner circle
+        color: '#000000', // #rgb or #rrggbb or array of colors
+        fadeColor: 'transparent', // CSS color or array of colors
+        speed: 1.9, // Rounds per second
+        trail: 40, // Afterglow percentage
+        className: 'spinner', // The CSS class to assign to the spinner
+        top: '50%', // Top position relative to parent in px
+        left: '50%', // Left position relative to parent in px
+        shadow: '0 0 1px transparent', // Box-shadow for the lines
+        position: 'relative' // Element positioning
+    };
+}
+
+function changeColorMode(md) {
+    md === "light" ? lightMode() : darkMode();
+}
+
+function lightMode() {
+    document.documentElement.setAttribute('color-theme', 'light');
+}
+
+function darkMode() {
+    document.documentElement.setAttribute('color-theme', 'dark');
+}
+
+function drawBarChart(src_path) {
     d3.csv(src_path).then(data => {
 
         var DURATION = 700; // d3 animation duration
@@ -17,7 +55,7 @@ function draw_bar_chart(src_path) {
 
         // size of the diagram
         var windowWidth = window.innerWidth - 20;
-        var windowHeight = grf_height;
+        var windowHeight = grfHeight;
         var width = windowWidth - (curX * 2);
         var height = windowHeight - (curY * 2);
 
@@ -26,11 +64,11 @@ function draw_bar_chart(src_path) {
             .range(["#5E4FA2", "#3288BD", "#66C2A5", "#ABDDA4", "#E6F598",
                 "#FFFFBF", "#FEE08B", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142"]);
 
-        d3.selectAll(".bar_chart").remove();
+        d3.selectAll(".barChart").remove();
 
         // define the svgBase, attaching a class for styling
-        var svgBase = d3.select("#barChart").append("svg")
-            .attr("class", "bar_chart")
+        var svgBase = d3.select("#barChartGrf").append("svg")
+            .attr("class", "barChart")
             .attr("width", windowWidth)
             .attr("height", windowHeight)
 
@@ -40,7 +78,7 @@ function draw_bar_chart(src_path) {
 
         // add the title
         svgGroup.append("text")
-            .attr("class", "grf_title")
+            .attr("class", "grfTitle")
             .attr("x", width / 2)
             .attr("y", -40)
             .attr("text-anchor", "middle")
@@ -70,7 +108,7 @@ function draw_bar_chart(src_path) {
             .attr("class", "grid")
 
         // set up document events
-        d3.select(window).on('resize.bar_chart', resize);
+        d3.select(window).on('resize.barChart', resize);
 
         var root = data;
 
@@ -109,7 +147,7 @@ function draw_bar_chart(src_path) {
                     .attr("height", 1e-6);
 
                 barEnter.append('text')
-                    .attr('class', 'bar_txt')
+                    .attr('class', 'barTxt')
                     .attr('x', d => x(d.YEAR) + x.bandwidth() / 2)
                     .attr('y', d => y(d.VALUE) - 10)
                     .attr('text-anchor', 'middle')
@@ -119,7 +157,7 @@ function draw_bar_chart(src_path) {
 
                 var barUpdate = bar.merge(barEnter).transition().duration(duration);
 
-                barUpdate.selectAll(".bar_txt")
+                barUpdate.selectAll(".barTxt")
                     .attr('fill', 'black')
                     .attr('dy', '.35em')
                     .style('fill-opacity', 1);
@@ -136,11 +174,11 @@ function draw_bar_chart(src_path) {
                     .attr("width", x.bandwidth())
                     .attr("height", d => height - y(d.VALUE));
 
-                barUpdate.selectAll('.bar_txt')
+                barUpdate.selectAll('.barTxt')
                     .attr('x', d => x(d.YEAR) + x.bandwidth() / 2)
                     .attr('y', d => y(d.VALUE) - 10);
             }
-            svgGroup.selectAll(".grf_title")
+            svgGroup.selectAll(".grfTitle")
                 .attr("x", width / 2)
                 .attr("y", -40);
 
@@ -175,7 +213,7 @@ function draw_bar_chart(src_path) {
 
         function resize() { // window resize
             windowWidth = window.innerWidth - 20;
-            windowHeight = grf_height
+            windowHeight = grfHeight
             width = windowWidth - (curX * 2);
             height = windowHeight - (curY * 2);
             svgBase.attr('width', windowWidth).attr('height', windowHeight);
