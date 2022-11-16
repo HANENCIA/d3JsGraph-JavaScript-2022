@@ -7,31 +7,6 @@ function init() {
     drawBarChart(src_path);
 }
 
-function lightMode() {
-    document.documentElement.setAttribute('color-theme', 'light');
-
-    document.getElementById("articleCntGrf").setAttribute('class', 'bg-light border');
-    document.getElementById("articleCntRegionGrf").setAttribute('class', 'bg-light border');
-    document.getElementById("typCntGrf").setAttribute('class', 'bg-light border');
-    document.getElementById("catCntGrf").setAttribute('class', 'bg-light border');
-
-    spin_opts = {
-        lines: 9, // The number of lines to draw
-        length: 9, // The length of each line
-        width: 5, // The line thickness
-        radius: 14, // The radius of the inner circle
-        color: '#000000', // #rgb or #rrggbb or array of colors
-        fadeColor: 'transparent', // CSS color or array of colors
-        speed: 1.9, // Rounds per second
-        trail: 40, // Afterglow percentage
-        className: 'spinner', // The CSS class to assign to the spinner
-        top: '50%', // Top position relative to parent in px
-        left: '50%', // Left position relative to parent in px
-        shadow: '0 0 1px transparent', // Box-shadow for the lines
-        position: 'relative' // Element positioning
-    };
-}
-
 function changeColorMode(md) {
     md === "light" ? lightMode() : darkMode();
 }
@@ -134,7 +109,6 @@ function drawBarChart(src_path) {
 
             var bar = svgGroup.selectAll(".graph").data(data);
 
-            // var barEnter = bar.enter().insert("g");
             var barEnter = bar.enter();
 
             if (resize == false) {
@@ -160,6 +134,7 @@ function drawBarChart(src_path) {
                 barUpdate.selectAll(".barTxt")
                     .attr('fill', 'black')
                     .attr('dy', '.35em')
+                    .style('font-size', Math.min(x.bandwidth()/3, 15)+"px")
                     .style('fill-opacity', 1);
 
                 barUpdate.selectAll(".bar")
@@ -176,7 +151,8 @@ function drawBarChart(src_path) {
 
                 barUpdate.selectAll('.barTxt')
                     .attr('x', d => x(d.YEAR) + x.bandwidth() / 2)
-                    .attr('y', d => y(d.VALUE) - 10);
+                    .attr('y', d => y(d.VALUE) - 10)
+                    .style('font-size', Math.min(x.bandwidth()/3, 15)+"px");
             }
             svgGroup.selectAll(".grfTitle")
                 .attr("x", width / 2)

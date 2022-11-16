@@ -16,6 +16,14 @@
     color: var(--txt-font-color);
 }
 
+.xticks {
+    color: var(--txt-font-color);
+}
+
+.yticks {
+    color: var(--txt-font-color);
+}
+
 .xlabel {
     fill: var(--txt-font-color);
 }
