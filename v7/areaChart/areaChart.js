@@ -54,8 +54,6 @@ function drawAreaChart(src_path) {
         // add click listener
         svgGroup.append("rect")
             .attr("class", "listening-rect")
-            .attr("width", width)
-            .attr("height", height)
 
         // add the title
         svgGroup.append("text")
@@ -88,6 +86,23 @@ function drawAreaChart(src_path) {
         svgGroup.append("g")
             .attr("class", "grid")
 
+        const tooltipCircle = svgGroup
+            .append("circle")
+            .attr("class", "tooltip-circle")
+            .attr("r", 4)
+            .attr("stroke", "#af9358")
+            .attr("fill", "white")
+            .attr("stroke-width", 2)
+            .style("opacity", 0);
+
+        const tooltipLine = svgGroup
+            .append("g")
+            .append("rect")
+            .attr("class", "dotted")
+            .attr("stroke-width", "1px")
+            .attr("width", ".5px")
+            .attr("height", height);
+
         // set up document events
         d3.select(window).on('resize.areaChart', resize);
 
@@ -102,29 +117,21 @@ function drawAreaChart(src_path) {
                 .attr('transform', 'translate(' + curX + ',' + curY + ')');
 
             // set the ranges
-            var x = d3.scaleLinear()
-                .range([0, width]);
-            var y = d3.scaleLinear()
-                .range([height, 0]);
-
             data.forEach(d => d.NO = +d.NO);
             data.forEach(d => d.VALUE = +d.VALUE);
 
-            x.domain(d3.extent(data, d => d.NO));
-            y.domain(d3.extent(data, d => +d.VALUE));
+            var x = d3.scaleLinear()
+                .range([0, width])
+                .domain(d3.extent(data, d => d.NO));
+            var y = d3.scaleLinear()
+                .range([height, 0])
+                .domain(d3.extent(data, d => +d.VALUE));
 
+            // set the chart
             var area = svgGroup.datum(data);
             var areaEnter = svgGroup.selectAll(".graph").data(data).enter();
 
             if (resize == false) {
-                svgGroup.selectAll(".listening-rect")
-                    .attr("width", width)
-                    .attr("height", height)
-                    .attr('pointer-events', 'all')
-                    .on("mouseout", onMouseOut)
-                    .on("mouseover", onMouseOver)
-                    .on("mousemove", onMouseMove);
-
                 area.append("path")
                     .attr("class", "area")
                     .attr("fill", "#69b3a2")
@@ -135,20 +142,19 @@ function drawAreaChart(src_path) {
                         .y0(height)
                         .y1(1e-6));
 
-                areaEnter.append('circle')
-                    .attr('class', 'areaCircle')
-                    .attr("cx", d => x(d.NO))
-                    .attr("cy", d => y(d.VALUE))
-                    .attr("r", 1e-6)
-                    .attr("fill", "none")
-                    .attr("stroke", "none");
+                // areaEnter.append('circle')
+                //     .attr('class', 'areaCircle')
+                //     .attr("cx", d => x(d.NO))
+                //     .attr("cy", d => y(d.VALUE))
+                //     .attr("r", 1e-6)
+                //     .attr("fill", "none")
+                //     .attr("stroke", "none");
 
                 areaEnter.append("path")
                     .attr("class", "mouseLine")
                     .style("stroke", "black")
                     .style("stroke-width", "1px")
                     .style("opacity", "0");
-
 
                 var areaUpdate = area.transition().duration(duration);
 
@@ -158,9 +164,9 @@ function drawAreaChart(src_path) {
                         .y0(height)
                         .y1(d => y(d.VALUE)));
 
-                areaUpdate.selectAll(".areaCircle")
-                    .attr("fill", "red")
-                    .attr("r", 3);
+                // areaUpdate.selectAll(".areaCircle")
+                //     .attr("fill", "red")
+                //     .attr("r", 3);
 
 
             } else {
@@ -173,21 +179,22 @@ function drawAreaChart(src_path) {
                         .y1(d => y(d.VALUE))
                     );
 
-                areaUpdate.selectAll(".areaCircle")
-                    .attr("cx", d => x(d.NO))
-                    .attr("cy", d => y(d.VALUE))
-                    .attr("r", 3)
-                    .attr("fill", "red")
-                    .attr("stroke", "none");
+                // areaUpdate.selectAll(".areaCircle")
+                //     .attr("cx", d => x(d.NO))
+                //     .attr("cy", d => y(d.VALUE))
+                //     .attr("r", 3)
+                //     .attr("fill", "red")
+                //     .attr("stroke", "none");
 
-                svgGroup.selectAll(".listening-rect")
-                    .attr("width", width)
-                    .attr("height", height)
-                    .attr('pointer-events', 'all')
-                    .on("mouseout", onMouseOut)
-                    .on("mouseover", onMouseOver)
-                    .on("mousemove", onMouseMove);
+
             }
+            svgGroup.selectAll(".listening-rect")
+                .attr("width", width)
+                .attr("height", height)
+                .attr('pointer-events', 'all')
+                .on("mousemove", onMouseMove)
+                .on("mouseout", onMouseLeave);
+
             svgGroup.selectAll(".grfTitle")
                 .attr("x", width / 2)
                 .attr("y", -40);
@@ -221,42 +228,47 @@ function drawAreaChart(src_path) {
                     .tickFormat(''))
 
 
-            svgGroup.append("g")
-                .append("rect")
-                .attr("class", "dotted")
-                .attr("stroke-width", "1px")
-                .attr("width", ".5px")
-                .attr("height", height);
-
             function onMouseOut() {
                 // svgGroup.selectAll(".areaCircle")
                 //     .attr("fill", "none");
 
             }
 
-            function onMouseOver() {
-                // svgGroup.selectAll(".areaCircle")
-                //     .attr("fill", "red");
+            function onMouseLeave(event) {
+                // tooltip.style("opacity", 0);
+                // tooltipCircle.style("opacity", 0);
             }
 
             function onMouseMove(event) {
-                xCoor = d3.pointer(event)[0];
-                xValues = Math.round(x.invert(xCoor));
-                console.log(xValues);
-                svgGroup.select('.dotted')
-                    .attr("x", xCoor);
+                var mousePosition = d3.pointer(event)[0];
+                var hoveredX = Math.round(x.invert(mousePosition));
+                var xPosition = x(hoveredX);
+                var yPosition = height - y(hoveredX);
+                tooltipCircle
+                    .attr("cx", xPosition)
+                    .attr("cy", height)
+                    .style("opacity", 1);
+                tooltipLine
+                    .attr("x", xPosition);
+                // console.log(data[hoveredX].VALUE);
+                // console.log(data.NO[hoveredX]);
+                // console.log(xValues);
+                // svgGroup.select('.dotted')
+                //     .attr("x", mousePosition)
+                //     .attr("height", d => d.VALUE);
                 // svgGroup.selectAll('.areaCircle')
                 //     .each((d, i) => {
                 //         if (d.NO == xValues) {
 
-                        }
-                        //     area.select(this)
-                        //         // .attr("cx", xValues)
-                        //         // .attr("cy", d.VALUE)
-                        //         // .attr("r", 3)
-                        //         .attr("fill", "blue")
-                        //         .attr("stroke", "none");
-                        // });
+            }
+
+            //     area.select(this)
+            //         // .attr("cx", xValues)
+            //         // .attr("cy", d.VALUE)
+            //         // .attr("r", 3)
+            //         .attr("fill", "blue")
+            //         .attr("stroke", "none");
+            // });
             // }
         }
 
