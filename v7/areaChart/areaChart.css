@@ -44,6 +44,8 @@
 
 :root[color-theme='light'] {
     --grid-path_stroke: #000000;
+    --tooltip-line_stroke: #3288BD;
+    --tooltip-circle_stroke: #9E0142;
     --background: #F8F9FA;
     --txt-font-color: #000000;
     --link-stroke: #ccc;
@@ -51,6 +53,8 @@
 
 :root[color-theme='dark'] {
     --grid-path_stroke: #ffffff;
+    --tooltip-line_stroke: #E6F598;
+    --tooltip-circle_stroke: #9E0142;
     --background: #222529;
     --txt-font-color: #ffffff;
     --link-stroke: #318ce7;
@@ -95,4 +99,14 @@
     font-weight: 600;
     font-size: 1.1em;
     line-height: 1.4em;
+}
+
+.tooltip-line {
+    stroke-width: 1px;
+    stroke: var(--tooltip-line_stroke);
+}
+
+.tooltip-circle {
+    stroke: var(--tooltip-circle_stroke);
+    fill: var(--tooltip-circle_stroke);
 }
