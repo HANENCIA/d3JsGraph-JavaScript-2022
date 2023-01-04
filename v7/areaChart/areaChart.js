@@ -21,34 +21,34 @@ function darkMode() {
 
 function drawAreaChart(src_path) {
     d3.csv(src_path).then(data => {
+        // create data list
+        const xData = data.map(d => d.NO);
+        const yData = data.map(d => d.VALUE);
 
-        var DURATION = 700; // d3 animation duration
+        // d3 animation duration
+        let DURATION = 700;
 
         // current pan, zoom, and rotation
-        var curX = 80;
-        var curY = 80;
+        let curX = 80;
+        let curY = 80;
 
         // size of the diagram
-        var windowWidth = window.innerWidth - 20;
-        var windowHeight = grfHeight;
-        var width = windowWidth - (curX * 2);
-        var height = windowHeight - (curY * 2);
+        let windowWidth = window.innerWidth - 20;
+        let windowHeight = grfHeight;
+        let width = windowWidth - (curX * 2);
+        let height = windowHeight - (curY * 2);
 
-        var colors = d3.scaleQuantize()
-            .domain([0, height])
-            .range(["#5E4FA2", "#3288BD", "#66C2A5", "#ABDDA4", "#E6F598",
-                "#FFFFBF", "#FEE08B", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142"]);
-
+        // clear all graph
         d3.selectAll(".areaChart").remove();
 
         // define the svgBase, attaching a class for styling
-        var svgBase = d3.select("#areaChartGrf").append("svg")
+        let svgBase = d3.select("#areaChartGrf").append("svg")
             .attr("class", "areaChart")
             .attr("width", windowWidth)
             .attr("height", windowHeight)
 
         // Group which holds graph
-        var svgGroup = svgBase.append("g")
+        let svgGroup = svgBase.append("g")
             .attr('transform', 'translate(' + curX + ',' + curY + ')');
 
         // add click listener
@@ -85,6 +85,8 @@ function drawAreaChart(src_path) {
         // add grid
         svgGroup.append("g")
             .attr("class", "grid")
+
+        const tooltip = d3.select("#tooltip");
 
         const tooltipCircle = svgGroup
             .append("circle")
@@ -142,14 +144,6 @@ function drawAreaChart(src_path) {
                         .y0(height)
                         .y1(1e-6));
 
-                // areaEnter.append('circle')
-                //     .attr('class', 'areaCircle')
-                //     .attr("cx", d => x(d.NO))
-                //     .attr("cy", d => y(d.VALUE))
-                //     .attr("r", 1e-6)
-                //     .attr("fill", "none")
-                //     .attr("stroke", "none");
-
                 areaEnter.append("path")
                     .attr("class", "mouseLine")
                     .style("stroke", "black")
@@ -163,12 +157,6 @@ function drawAreaChart(src_path) {
                         .x(d => x(d.NO))
                         .y0(height)
                         .y1(d => y(d.VALUE)));
-
-                // areaUpdate.selectAll(".areaCircle")
-                //     .attr("fill", "red")
-                //     .attr("r", 3);
-
-
             } else {
                 var areaUpdate = area.transition().duration(duration)
 
@@ -178,15 +166,6 @@ function drawAreaChart(src_path) {
                         .y0(height)
                         .y1(d => y(d.VALUE))
                     );
-
-                // areaUpdate.selectAll(".areaCircle")
-                //     .attr("cx", d => x(d.NO))
-                //     .attr("cy", d => y(d.VALUE))
-                //     .attr("r", 3)
-                //     .attr("fill", "red")
-                //     .attr("stroke", "none");
-
-
             }
             svgGroup.selectAll(".listening-rect")
                 .attr("width", width)
@@ -227,13 +206,6 @@ function drawAreaChart(src_path) {
                     .tickSize(-width, 0, 0)
                     .tickFormat(''))
 
-
-            function onMouseOut() {
-                // svgGroup.selectAll(".areaCircle")
-                //     .attr("fill", "none");
-
-            }
-
             function onMouseLeave(event) {
                 // tooltip.style("opacity", 0);
                 // tooltipCircle.style("opacity", 0);
@@ -243,13 +215,29 @@ function drawAreaChart(src_path) {
                 var mousePosition = d3.pointer(event)[0];
                 var hoveredX = Math.round(x.invert(mousePosition));
                 var xPosition = x(hoveredX);
+                // console.log(mousePosition);
+                // console.log(hoveredX)
+                // console.log(xPosition);
+                // console.log(y(100));
+                console.log(y.range());
+
                 var yPosition = height - y(hoveredX);
+                tooltip
+                    .style("transform", `translate(` + `calc(${x(hoveredX)}px),` + `calc(-100% + ${height}px)` + `)`)
+                    .style("opacity", 1);
+
+                tooltip.select('#data_no').html(xData[hoveredX]);
+                tooltip.select('#data_value').html(yData[hoveredX]);
+
                 tooltipCircle
                     .attr("cx", xPosition)
                     .attr("cy", height)
                     .style("opacity", 1);
+
                 tooltipLine
                     .attr("x", xPosition);
+
+
                 // console.log(data[hoveredX].VALUE);
                 // console.log(data.NO[hoveredX]);
                 // console.log(xValues);
