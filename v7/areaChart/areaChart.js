@@ -1,6 +1,21 @@
 // Graph Height
 const grfHeight = 600;
 
+// d3 animation duration
+let DURATION = 700;
+
+// current pan, zoom, and rotation
+let curX = 80;
+let curY = 80;
+
+// Graph Range
+let rangeX = d3.scaleLinear();
+let rangeY = d3.scaleLinear();
+
+// create data list
+let xData
+let yData
+
 function init() {
     lightMode();
     let src_path = "./sampleData.csv"
@@ -21,16 +36,9 @@ function darkMode() {
 
 function drawAreaChart(src_path) {
     d3.csv(src_path).then(data => {
-        // create data list
-        const xData = data.map(d => d.NO);
-        const yData = data.map(d => d.VALUE);
-
-        // d3 animation duration
-        let DURATION = 700;
-
-        // current pan, zoom, and rotation
-        let curX = 80;
-        let curY = 80;
+        // mapping data list
+        xData = data.map(d => d.NO);
+        yData = data.map(d => d.VALUE);
 
         // size of the diagram
         let windowWidth = window.innerWidth - 20;
@@ -51,12 +59,8 @@ function drawAreaChart(src_path) {
         let svgGroup = svgBase.append("g")
             .attr('transform', 'translate(' + curX + ',' + curY + ')');
 
-        // add click listener
-        let clickListener = svgGroup.append("rect")
-            .attr("class", "listening-rect")
-
         // add the title
-        let graphTitle = svgGroup.append("text")
+        let grfTitle = svgGroup.append("text")
             .attr("class", "grfTitle")
             .attr("x", width / 2)
             .attr("y", -40)
@@ -85,7 +89,11 @@ function drawAreaChart(src_path) {
         // set the chart
         let area = svgGroup.datum(data);
         let areaEnter = svgGroup.selectAll(".graph").data(data).enter();
-        let graphArea =  area.append("path");
+        let grfArea = area.append("path");
+
+        // add click listener
+        let clickListener = svgGroup.append("rect")
+            .attr("class", "listening-rect")
 
         // add tooltip
         let tooltip = d3.select("#tooltip");
@@ -98,7 +106,8 @@ function drawAreaChart(src_path) {
             .append("g")
             .append("rect")
             .attr("class", "tooltip-line")
-            .attr("width", ".5px")
+            .attr("stroke-width", ".1px")
+            .attr("width", "2px")
             .attr("height", height);
 
         // add tooltip circle
@@ -106,9 +115,6 @@ function drawAreaChart(src_path) {
             .append("circle")
             .attr("class", "tooltip-circle")
             .attr("r", 4)
-            .attr("stroke", "#af9358")
-            .attr("fill", "white")
-            .attr("stroke-width", 2)
             .style("opacity", 0);
 
         // set up document events
@@ -128,52 +134,51 @@ function drawAreaChart(src_path) {
             data.forEach(d => d.NO = +d.NO);
             data.forEach(d => d.VALUE = +d.VALUE);
 
-            let x = d3.scaleLinear()
+            rangeX
                 .range([0, width])
                 .domain(d3.extent(data, d => d.NO));
-            let y = d3.scaleLinear()
+            rangeY
                 .range([height, 0])
                 .domain(d3.extent(data, d => +d.VALUE));
 
             let areaUpdate = area.transition().duration(duration);
 
             if (resize === false) {
-                graphArea
+                grfArea
                     .attr("class", "area")
-                    .attr("fill", "#32CD32")
-                    // .attr("fill-opacity", .7)
+                    .attr("fill", "#00FF00")
+                    .attr("fill-opacity", 1)
                     .attr("stroke", "none")
                     .attr("d", d3.area()
                         .x(1e-6)
                         .y0(height)
-                        .y1(d => y(d.VALUE)));
+                        .y1(d => rangeY(d.VALUE)));
 
                 areaUpdate.selectAll(".area")
                     .attr("d", d3.area()
-                        .x(d => x(d.NO))
+                        .x(d => rangeX(d.NO))
                         .y0(height)
-                        .y1(d => y(d.VALUE)));
+                        .y1(d => rangeY(d.VALUE)));
             } else {
                 areaUpdate.selectAll(".area")
                     .attr("d", d3.area()
-                        .x(d => x(d.NO))
+                        .x(d => rangeX(d.NO))
                         .y0(height)
-                        .y1(d => y(d.VALUE)));
+                        .y1(d => rangeY(d.VALUE)));
             }
 
             clickListener
-                .attr("width", width)
+                .attr("width", width < 0 ? 0 : width)
                 .attr("height", height)
                 .attr('pointer-events', 'all')
-                .on("mouseover", onMouseMove)
-                .on("mouseout", onMouseOut);
+                .on("mousemove", onMouseMove);
 
-            graphTitle
+            grfTitle
                 .attr("x", width / 2)
                 .attr("y", -40);
 
             xTicks
-                .call(d3.axisBottom(x))
+                .call(d3.axisBottom(rangeX))
                 .selectAll("text")
                 .attr("dx", "-.8em")
                 .attr("dy", ".15em")
@@ -181,7 +186,7 @@ function drawAreaChart(src_path) {
                 .style("text-anchor", "end");
 
             yTicks
-                .call(d3.axisLeft(y));
+                .call(d3.axisLeft(rangeY));
 
             xLabel
                 .attr('x', -(height / 2))
@@ -194,25 +199,15 @@ function drawAreaChart(src_path) {
                 .attr('y', height + 50)
                 .attr('text-anchor', 'middle');
 
-            function onMouseClick(event) {
-                event.preventDefault();
-                console.log("MOUSECLICK");
-            }
-
-            function onMouseOut(event) {
-                event.preventDefault();
-                console.log("MOUSEOUT");
-            }
-
             function onMouseMove(event) {
                 event.preventDefault();
                 let mousePosition = d3.pointer(event)[0];
-                let hoveredX = Math.round(x.invert(mousePosition));
-                let xPosition = x(hoveredX);
-                let yPosition = y(yData[hoveredX]);
+                let hoveredX = Math.round(rangeX.invert(mousePosition));
+                let xPosition = rangeX(hoveredX);
+                let yPosition = rangeY(yData[hoveredX - 1]);
 
                 tooltipCircle
-                    .attr("cx", xPosition)
+                    .attr("cx", xPosition + 1)
                     .attr("cy", yPosition)
                     .style("opacity", 1);
 
@@ -224,7 +219,7 @@ function drawAreaChart(src_path) {
 
                 resultTable.select("#table_no_label").html(xData[hoveredX]);
                 resultTable.select('#table_value_label').html(yData[hoveredX]);
-                resultTable.select('#table_link_label').attr('href', "javascript:alert("+yData[hoveredX]+");").html("LINK");
+                resultTable.select('#table_link_label').attr('href', "javascript:alert(" + yData[hoveredX] + ");").html("LINK");
 
                 tooltipLine
                     .attr("x", xPosition);

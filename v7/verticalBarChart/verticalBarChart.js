@@ -1,9 +1,20 @@
 // Graph Height
-const grfHeight = 600;
+const grfHeight = 800;
+
+// d3 animation duration
+let DURATION = 700;
+
+// current pan, zoom, and rotation
+let curX = 80;
+let curY = 80;
+
+// Graph Range
+let rangeX = d3.scaleBand();
+let rangeY = d3.scaleLinear();
 
 function init() {
     lightMode();
-    var src_path = "./sampleData.csv"
+    let src_path = "./sampleData.csv"
     drawBarChart(src_path);
 }
 
@@ -21,38 +32,32 @@ function darkMode() {
 
 function drawBarChart(src_path) {
     d3.csv(src_path).then(data => {
-
-        var DURATION = 700; // d3 animation duration
-
-        // current pan, zoom, and rotation
-        var curX = 80;
-        var curY = 80;
-
         // size of the diagram
-        var windowWidth = window.innerWidth - 20;
-        var windowHeight = grfHeight;
-        var width = windowWidth - (curX * 2);
-        var height = windowHeight - (curY * 2);
+        let windowWidth = window.innerWidth - 20;
+        let windowHeight = grfHeight;
+        let width = windowWidth - (curX * 2);
+        let height = windowHeight - (curY * 2);
 
-        var colors = d3.scaleQuantize()
+        let colors = d3.scaleQuantize()
             .domain([0, height])
             .range(["#5E4FA2", "#3288BD", "#66C2A5", "#ABDDA4", "#E6F598",
                 "#FFFFBF", "#FEE08B", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142"]);
 
+        // clear all graph
         d3.selectAll(".barChart").remove();
 
         // define the svgBase, attaching a class for styling
-        var svgBase = d3.select("#barChartGrf").append("svg")
+        let svgBase = d3.select("#barChartGrf").append("svg")
             .attr("class", "barChart")
             .attr("width", windowWidth)
             .attr("height", windowHeight)
 
         // Group which holds graph
-        var svgGroup = svgBase.append("g")
+        let svgGroup = svgBase.append("g")
             .attr('transform', 'translate(' + curX + ',' + curY + ')');
 
         // add the title
-        svgGroup.append("text")
+        let grfTitle = svgGroup.append("text")
             .attr("class", "grfTitle")
             .attr("x", width / 2)
             .attr("y", -40)
@@ -60,131 +65,131 @@ function drawBarChart(src_path) {
             .text("Title");
 
         // add the x Axis
-        svgGroup.append("g")
+        let xTicks = svgGroup.append("g")
             .attr("transform", "translate(0," + height + ")")
             .attr("class", "xticks");
 
         // add the y Axis
-        svgGroup.append("g")
+        let yTicks = svgGroup.append("g")
             .attr("class", "yticks")
 
         // add x Label
-        svgGroup.append("text")
+        let xLabel = svgGroup.append("text")
             .attr("class", "xlabel")
             .text("COUNT");
 
         // add y Label
-        svgGroup.append("text")
+        let yLabel = svgGroup.append("text")
             .attr("class", "ylabel")
             .text("YEAR");
 
         // add grid
-        svgGroup.append("g")
+        let grfGrid = svgGroup.append("g")
             .attr("class", "grid")
 
         // set up document events
         d3.select(window).on('resize.barChart', resize);
 
-        var root = data;
+        let root = data;
 
         update(root, true, false);
 
         function update(source, transition, resize) {
-            var duration = transition ? DURATION : 0;
+            let duration = transition ? DURATION : 0;
 
             svgGroup.transition().duration(duration)
                 .attr('transform', 'translate(' + curX + ',' + curY + ')');
 
             // set the ranges
-            var x = d3.scaleBand()
+            rangeX
                 .range([0, width])
                 .padding(0.1);
-            var y = d3.scaleLinear()
+            rangeY
                 .range([height, 0]);
 
             data.forEach(d => d.VALUE = +d.VALUE);
 
-            x.domain(data.map(d => d.YEAR));
-            y.domain([0, d3.max(data, d => d.VALUE)]);
+            rangeX.domain(data.map(d => d.YEAR));
+            rangeY.domain([0, d3.max(data, d => d.VALUE)]);
 
-            var bar = svgGroup.selectAll(".graph").data(data);
+            let bar = svgGroup.selectAll(".graph").data(data);
 
-            var barEnter = bar.enter();
+            let barEnter = bar.enter();
 
             if (resize == false) {
                 barEnter.append("rect")
                     .attr("class", "bar")
-                    .attr("fill", d => colors(height - y(d.VALUE)))
-                    .attr("x", d => x(d.YEAR))
-                    .attr("width", x.bandwidth())
+                    .attr("fill", d => colors(height - rangeY(d.VALUE)))
+                    .attr("x", d => rangeX(d.YEAR))
+                    .attr("width", rangeX.bandwidth())
                     .attr("y", d => height)
                     .attr("height", 1e-6);
 
                 barEnter.append('text')
                     .attr('class', 'barTxt')
-                    .attr('x', d => x(d.YEAR) + x.bandwidth() / 2)
-                    .attr('y', d => y(d.VALUE) - 10)
+                    .attr('x', d => rangeX(d.YEAR) + rangeX.bandwidth() / 2)
+                    .attr('y', d => rangeY(d.VALUE) - 10)
                     .attr('text-anchor', 'middle')
                     .style('opacity', 0.9)
                     .style('fill-opacity', 0)
                     .text(d => d.VALUE);
 
-                var barUpdate = bar.merge(barEnter).transition().duration(duration);
+                let barUpdate = bar.merge(barEnter).transition().duration(duration);
 
                 barUpdate.selectAll(".barTxt")
                     .attr('fill', 'black')
                     .attr('dy', '.35em')
-                    .style('font-size', Math.min(x.bandwidth()/3, 15)+"px")
+                    .style('font-size', Math.min(rangeX.bandwidth() / 3, 15) + "px")
                     .style('fill-opacity', 1);
 
                 barUpdate.selectAll(".bar")
-                    .attr("y", d => y(d.VALUE))
-                    .attr("height", d => height - y(d.VALUE));
+                    .attr("y", d => rangeY(d.VALUE))
+                    .attr("height", d => height - rangeY(d.VALUE));
             } else {
-                var barUpdate = bar.merge(barEnter).transition().duration(duration)
+                let barUpdate = bar.merge(barEnter).transition().duration(duration)
 
                 barUpdate.selectAll(".bar")
-                    .attr("x", d => x(d.YEAR))
-                    .attr("y", d => y(d.VALUE))
-                    .attr("width", x.bandwidth())
-                    .attr("height", d => height - y(d.VALUE));
+                    .attr("x", d => rangeX(d.YEAR))
+                    .attr("y", d => rangeY(d.VALUE))
+                    .attr("width", rangeX.bandwidth())
+                    .attr("height", d => height - rangeY(d.VALUE));
 
                 barUpdate.selectAll('.barTxt')
-                    .attr('x', d => x(d.YEAR) + x.bandwidth() / 2)
-                    .attr('y', d => y(d.VALUE) - 10)
-                    .style('font-size', Math.min(x.bandwidth()/3, 15)+"px");
+                    .attr('x', d => rangeX(d.YEAR) + rangeX.bandwidth() / 2)
+                    .attr('y', d => rangeY(d.VALUE) - 10)
+                    .style('font-size', Math.min(rangeX.bandwidth() / 3, 15) + "px");
             }
-            svgGroup.selectAll(".grfTitle")
+            grfTitle
                 .attr("x", width / 2)
                 .attr("y", -40);
 
-            svgGroup.selectAll(".xticks")
-                .call(d3.axisBottom(x))
+            xTicks
+                .call(d3.axisBottom(rangeX))
                 .selectAll("text")
                 .attr("dx", "-.8em")
                 .attr("dy", ".15em")
                 .attr("transform", "rotate(-65)")
                 .style("text-anchor", "end");
 
-            svgGroup.selectAll(".yticks")
-                .call(d3.axisLeft(y));
+            yTicks
+                .call(d3.axisLeft(rangeY));
 
-            svgGroup.selectAll(".xlabel")
+            xLabel
                 .attr('x', -(height / 2))
                 .attr('y', -curY + 20)
                 .attr('transform', 'rotate(-90)')
                 .attr('text-anchor', 'middle');
 
-            svgGroup.selectAll(".ylabel")
+            yLabel
                 .attr('x', (width / 2))
                 .attr('y', height + 50)
                 .attr('text-anchor', 'middle');
 
-            svgGroup.selectAll(".grid")
+            grfGrid
                 .call(d3.axisLeft()
-                    .scale(y)
+                    .scale(rangeY)
                     .tickSize(-width, 0, 0)
-                    .tickFormat(''))
+                    .tickFormat(''));
         }
 
         function resize() { // window resize
