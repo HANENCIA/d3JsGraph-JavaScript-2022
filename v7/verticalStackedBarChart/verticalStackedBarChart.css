@@ -1,0 +1,57 @@
+.barChart {
+    background: var(--background);
+}
+
+.grfTitle {
+    font-size: 20px;
+    fill: var(--txt-font-color);
+}
+
+.barTxt {
+    fill: var(--txt-font-color);
+}
+
+.tick {
+    font-size: 10px;
+    color: var(--txt-font-color);
+}
+
+.xticks {
+    color: var(--txt-font-color);
+}
+
+.yticks {
+    color: var(--txt-font-color);
+}
+
+.xlabel {
+    fill: var(--txt-font-color);
+}
+
+.ylabel {
+    fill: var(--txt-font-color);
+}
+
+.grid path {
+    stroke: var(--grid-path_stroke);
+}
+
+.grid line {
+    stroke: lightgrey;
+    stroke-opacity: 0.7;
+    shape-rendering: crispEdges;
+}
+
+:root[color-theme='light'] {
+    --grid-path_stroke: #000000;
+    --background: #F8F9FA;
+    --txt-font-color: #000000;
+    --link-stroke: #ccc;
+}
+
+:root[color-theme='dark'] {
+    --grid-path_stroke: #ffffff;
+    --background: #222529;
+    --txt-font-color: #ffffff;
+    --link-stroke: #318ce7;
+}

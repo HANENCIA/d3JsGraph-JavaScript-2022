@@ -115,7 +115,7 @@ function drawBarChart(src_path) {
 
             let barEnter = bar.enter();
 
-            if (resize == false) {
+            if (resize === false) {
                 barEnter.append("rect")
                     .attr("class", "bar")
                     .attr("fill", d => colors(rangeX(d.VALUE)))
